@@ -22,6 +22,7 @@ const reposName = 'vuejs'
 const perPage = ref(10)
 const page = ref(1)
 const bottom = ref(null)
+const isLoading = ref(false)
 
 interface ReposData {
   name: string
@@ -32,11 +33,21 @@ interface ReposData {
 const reposData = ref<ReposData[]>([])
 
 const getReposData = async () => {
+  if (isLoading.value) return
+
+  isLoading.value = true
+
   const res = await fetch(
     `https://api.github.com/users/${reposName}/repos?per_page=${perPage.value}&page=${page.value}`,
   )
 
-  reposData.value = await res.json()
+  const data = await res.json()
+
+  reposData.value.push(...data)
+
+  page.value++
+
+  isLoading.value = false
 }
 
 const createObserver = () => {
