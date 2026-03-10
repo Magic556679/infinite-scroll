@@ -10,6 +10,8 @@
           <a :href="item.html_url" target="_blank">repo url</a>
         </div>
       </div>
+      <div v-if="isLoading">loading...</div>
+      <div v-if="isFinish">no more</div>
     </div>
     <div ref="bottom"></div>
   </div>
@@ -19,10 +21,11 @@
 import { onMounted, ref } from 'vue'
 
 const reposName = 'vuejs'
-const perPage = ref(10)
+const perPage = ref(30)
 const page = ref(1)
 const bottom = ref(null)
 const isLoading = ref(false)
+const isFinish = ref(false)
 
 interface ReposData {
   name: string
@@ -33,7 +36,7 @@ interface ReposData {
 const reposData = ref<ReposData[]>([])
 
 const getReposData = async () => {
-  if (isLoading.value) return
+  if (isLoading.value || isFinish.value) return
 
   isLoading.value = true
 
@@ -46,6 +49,10 @@ const getReposData = async () => {
   reposData.value.push(...data)
 
   page.value++
+
+  if (data.length !== perPage.value) {
+    isFinish.value = true
+  }
 
   isLoading.value = false
 }
