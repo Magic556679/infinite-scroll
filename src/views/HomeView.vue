@@ -3,9 +3,8 @@
     <h1>Vuejs Repositories</h1>
 
     <div ref="viewArea">
-      <div v-for="(item, index) in reposData" :key="item.id">
+      <div v-for="item in reposData" :key="item.id">
         <div class="my-1 border p-1 rounded-2xl">
-          <span>index: {{ index }}</span>
           <h3>{{ item.name }}</h3>
           <p>{{ item.description }}</p>
           <a :href="item.html_url" target="_blank">repo url</a>
@@ -20,8 +19,9 @@
 import { onMounted, ref } from 'vue'
 
 const reposName = 'vuejs'
-const perPage = ref(10) // default 30
+const perPage = ref(10)
 const page = ref(1)
+const bottom = ref(null)
 
 interface ReposData {
   name: string
@@ -39,8 +39,26 @@ const getReposData = async () => {
   reposData.value = await res.json()
 }
 
+const createObserver = () => {
+  const intersectionObserver = new IntersectionObserver(
+    (entries) => {
+      if (!entries[0]!.isIntersecting) return
+
+      getReposData()
+    },
+    {
+      rootMargin: '100px',
+    },
+  )
+
+  if (bottom.value) {
+    intersectionObserver.observe(bottom.value)
+  }
+}
+
 onMounted(() => {
   getReposData()
+  createObserver()
 })
 </script>
 
